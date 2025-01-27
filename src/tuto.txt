@@ -1,0 +1,3 @@
+mettre un serveur en marche
+pouvoir creer un client et le faire rejoindre le serveur\
+faire tournee en boucle et recevoir les premieres commandes
