@@ -1,30 +1,55 @@
-#include "../include/client.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dferjul <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/21 13:34:47 by afont             #+#    #+#             */
+/*   Updated: 2025/02/03 01:05:31 by dferjul          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-Client::Client(int socket, struct sockaddr_in address) : _socket_fd(socket), _nickname(""), _authenticated(false), _address(address) {}
+#include "../include/all.hpp"
 
-Client::~Client(){}
-
-int Client::getSocketFd() const {
-    return _socket_fd;
-}
-void Client::setSocketFd(int fd) {
-    _socket_fd = fd;
-}
-
-const std::string& Client::getNickname() const {
-    return _nickname;
-}
-void Client::setNickname(const std::string& nickname) {
-    _nickname = nickname;
+Client::Client()
+{
 }
 
-bool Client::isAuthenticated() const {
-    return _authenticated;
-}
-void Client::setAuthenticated(bool state) {
-    _authenticated = state;
+Client::~Client()
+{
 }
 
-const struct sockaddr_in& Client::getAddress() const {
-    return _address;
+void Client::sendWelcome()
+{
+	int status;
+	
+	std::vector<std::string> messages;
+	messages.push_back(":server 001 " + _nickname + " :Welcome to the " + SERVER_NAME + " Network " + _nickname + "!" + _username + "@" + _ip + "\r\n");
+	messages.push_back(":server 002 " + _nickname + " :Your host is " + _ip + ", running version " + VERSION + "\r\n");
+	messages.push_back(":server 003 " + _nickname + " :This server was created " + __DATE__ + " " + __TIME__ + "\r\n");
+	messages.push_back(":server 004 " + _nickname + " " + _ip + " " + VERSION + " None it kol\r\n");
+	
+	while (!messages.empty())
+	{
+		status = send(_fd, messages[0].c_str(), messages[0].length(), 0);
+		if (status == -1)
+			std::cout << "send() failed" << std::endl;
+		messages.erase(messages.begin());
+	}
+}
+
+void Client::sendMessage(const std::string& message) const
+{
+	if (send(_fd, message.c_str(), message.length(), 0) == -1)
+		std::cout << "send() failed" << std::endl;
+}
+
+void Client::sendMessageToChannel(const std::string& message, const std::vector<Client>& clients)
+{
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		if (clients[i]._fd != _fd)
+			clients[i].sendMessage(message);
+	}
 }

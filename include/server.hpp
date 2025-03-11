@@ -1,30 +1,36 @@
-#pragma once 
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: afont <afont@student.42nice.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/01/10 11:21:51 by afont             #+#    #+#             */
+/*   Updated: 2025/01/10 11:21:51 by afont            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <string>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <stdexcept>
-#include <poll.h>
-#include <fcntl.h>
-#include <iostream>
-#include <vector>
-#include "client.hpp"
+#pragma once
+#include "all.hpp"
 
-
-class Server{
-	private  :
-	std::vector<Client> _client;
-	int fd_serv;
-	std::string _ip;
-	int _port;
-	std::vector<struct pollfd> fdvec;
-
-	public :
-	Server();
-	~Server();
-	void init();
-	void run();
-	void connectServer();
+class	Server
+{
+	private:
+	public:
+		int							_port;
+		int							_socketFd;
+		static bool					_signal;
+		std::vector<struct pollfd>	_pfds;
+		std::vector<Client>			_clients;
+		
+		Server();
+		~Server();
+		int			getClientIndex(int fd);
+		void		initServer(t_cmd *dataCmd);
+		void		initSocket();
+		void		closeFd();
+		void		newClient();
+		void		processData(t_cmd *dataCmd, int fd);
+		void		removeClient(int fd);
+		static void	signalHandler(int signum);
 };
